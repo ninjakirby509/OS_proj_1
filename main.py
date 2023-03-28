@@ -103,7 +103,7 @@ def main():
     eq = []
     eq.append(new_process(id, time, arr_rate))
 
-    while len(eq) != 0 or processes <= 2:
+    while len(eq) != 0 and processes <= 2:
         print("\n")
         eq = sorted(eq, key=lambda event: event.time)
         time = eq[0].time
