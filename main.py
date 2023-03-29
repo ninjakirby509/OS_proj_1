@@ -14,8 +14,7 @@ class Event:
         self.process = process
         self.time = time
 
-    def handle_event(self):
-        return
+
     def __repr__(self):
         return self.type + " of " + str(self.process.id) + " on " + self.loc + " @ " + str(self.time)
 
@@ -24,6 +23,9 @@ class Process:
     def __init__(self, id, arr_time):
         self.id = id
         self.arr_time = arr_time
+
+    def find_turnaround(self, time):
+        return time - self.arr_time
 
     def __repr__(self):
         return str(self.id) + " arrived at " + str(self.arr_time)
@@ -34,13 +36,16 @@ class CPU:
         self.avail = True
         self.service_time = service_time
         self.queue = []
+        self.time_since_on = 0
+        self.total_time = 0
 
     def arr_handler(self, eq, event, time):
         if self.avail:
             self.avail = False
+            self.time_since_on = time
             eq.append(Event(event.process, 'DEP', 'CPU', time+exponential(self.service_time)))
         else:
-            self.queue.append(event)
+            self.queue.append(event.process)
 
     def dep_handler(self, eq, event, time):
         prob = random.random()
@@ -54,6 +59,7 @@ class CPU:
             self.queue.pop(0)
         else:
             self.avail = True
+            self.total_time += (time - self.time_since_on)
         return exit
 
 
@@ -63,10 +69,13 @@ class DISK:
         self.avail = True
         self.service_time = service_time
         self.queue = []
+        self.time_since_on = 0
+        self.total_time = 0
 
     def arr_handler(self, eq, event, time):
         if self.avail:
             self.avail = False
+            self.time_since_on = time
             eq.append(Event(event.process, 'DEP', 'DISK', time+exponential(self.service_time)))
         else:
             self.queue.append(event.process)
@@ -78,6 +87,7 @@ class DISK:
             self.queue.pop(0)
         else:
             self.avail = True
+            self.total_time += (time - self.time_since_on)
 
 
 def new_process(id, time, arr_rate):
@@ -100,17 +110,23 @@ def main():
     processes = 0
     id = 0
     time = 0
+    iteration = 0
+    cpu_queue_cap = 0
+    disk_queue_cap = 0
+    turnaround = 0
     eq = []
     eq.append(new_process(id, time, arr_rate))
-
-    while len(eq) != 0 and processes <= 2:
+    while len(eq) != 0 and processes < 10000:
+        iteration += 1
         print("\n")
+        print("ITERATION "+str(iteration))
         eq = sorted(eq, key=lambda event: event.time)
         time = eq[0].time
-        print(time)
+
+        print("Time: "+str(time))
         print(eq)
         curr = eq[0]
-        print(curr)
+        print("handling " + str(curr) + "...")
         eq.pop(0)
         if curr.loc == 'CPU':
             if curr.type == 'ARR':
@@ -121,6 +137,7 @@ def main():
             elif curr.type == 'DEP':
                 if cpu.dep_handler(eq, curr, time):
                     processes+=1
+                    turnaround += curr.process.find_turnaround(time)
         elif curr.loc == 'DISK':
             if curr.type == 'ARR':
                 disk.arr_handler(eq, curr, time)
@@ -128,6 +145,18 @@ def main():
                 disk.dep_handler(eq, curr, time)
         print(eq)
         print("PROCESSES COMPLETE: " + str(processes))
+        cpu_queue_cap += len(cpu.queue)
+        disk_queue_cap += len(disk.queue)
+    print("\nFINAL STATS:")
+    print("Average Turnaround: \n" + str(turnaround/10000))
+    print("Average Throughput: \n" + str(time/10000))
+    print("CPU Util: \n" + str(cpu.total_time/time))
+    print("Disk Util: \n" + str(disk.total_time/time))
+    print("Average # of items in CPU queue: \n" + str(cpu_queue_cap / iteration))
+    print("Average # of items in Disk queue: \n" + str(disk_queue_cap / iteration))
+
+
+
 
 
 
