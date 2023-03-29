@@ -118,15 +118,15 @@ def main():
     eq.append(new_process(id, time, arr_rate))
     while len(eq) != 0 and processes < 10000:
         iteration += 1
-        print("\n")
-        print("ITERATION "+str(iteration))
+        #print("\n")
+        #print("ITERATION "+str(iteration))
         eq = sorted(eq, key=lambda event: event.time)
         time = eq[0].time
 
-        print("Time: "+str(time))
-        print(eq)
+        #print("Time: "+str(time))
+        #print(eq)
         curr = eq[0]
-        print("handling " + str(curr) + "...")
+        #print("handling " + str(curr) + "...")
         eq.pop(0)
         if curr.loc == 'CPU':
             if curr.type == 'ARR':
@@ -143,8 +143,8 @@ def main():
                 disk.arr_handler(eq, curr, time)
             elif curr.type == 'DEP':
                 disk.dep_handler(eq, curr, time)
-        print(eq)
-        print("PROCESSES COMPLETE: " + str(processes))
+        #print(eq)
+        #print("PROCESSES COMPLETE: " + str(processes))
         cpu_queue_cap += len(cpu.queue)
         disk_queue_cap += len(disk.queue)
     print("\nFINAL STATS:")
