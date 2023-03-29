@@ -62,6 +62,10 @@ class CPU:
             self.total_time += (time - self.time_since_on)
         return exit
 
+    def handle_util(self, time):
+        if not self.avail:
+            self.total_time += (time - self.time_since_on)
+
 
 
 class DISK:
@@ -87,6 +91,10 @@ class DISK:
             self.queue.pop(0)
         else:
             self.avail = True
+            self.total_time += (time - self.time_since_on)
+
+    def handle_util(self, time):
+        if not self.avail:
             self.total_time += (time - self.time_since_on)
 
 
@@ -116,17 +124,11 @@ def main():
     turnaround = 0
     eq = []
     eq.append(new_process(id, time, arr_rate))
-    while len(eq) != 0 and processes < 10000:
+    while len(eq) != 0 and processes < 1000:
         iteration += 1
-        #print("\n")
-        #print("ITERATION "+str(iteration))
         eq = sorted(eq, key=lambda event: event.time)
         time = eq[0].time
-
-        #print("Time: "+str(time))
-        #print(eq)
         curr = eq[0]
-        #print("handling " + str(curr) + "...")
         eq.pop(0)
         if curr.loc == 'CPU':
             if curr.type == 'ARR':
@@ -143,13 +145,13 @@ def main():
                 disk.arr_handler(eq, curr, time)
             elif curr.type == 'DEP':
                 disk.dep_handler(eq, curr, time)
-        #print(eq)
-        #print("PROCESSES COMPLETE: " + str(processes))
         cpu_queue_cap += len(cpu.queue)
         disk_queue_cap += len(disk.queue)
+    cpu.handle_util(time)
+    disk.handle_util(time)
     print("\nFINAL STATS:")
-    print("Average Turnaround: \n" + str(turnaround/10000))
-    print("Average Throughput: \n" + str(time/10000))
+    print("Average Turnaround: \n" + str(turnaround/1000))
+    print("Average Throughput: \n" + str(time/1000))
     print("CPU Util: \n" + str(cpu.total_time/time))
     print("Disk Util: \n" + str(disk.total_time/time))
     print("Average # of items in CPU queue: \n" + str(cpu_queue_cap / iteration))
