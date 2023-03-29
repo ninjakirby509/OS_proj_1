@@ -124,7 +124,7 @@ def main():
     turnaround = 0
     eq = []
     eq.append(new_process(id, time, arr_rate))
-    while len(eq) != 0 and processes < 1000:
+    while len(eq) != 0 and processes < 10000:
         iteration += 1
         eq = sorted(eq, key=lambda event: event.time)
         time = eq[0].time
@@ -149,9 +149,9 @@ def main():
         disk_queue_cap += len(disk.queue)
     cpu.handle_util(time)
     disk.handle_util(time)
-    print("\nFINAL STATS:")
-    print("Average Turnaround: \n" + str(turnaround/1000))
-    print("Average Throughput: \n" + str(time/1000))
+    print("FINAL STATS:")
+    print("Average Turnaround: \n" + str(turnaround/10000))
+    print("Average Throughput: \n" + str(time/10000))
     print("CPU Util: \n" + str(cpu.total_time/time))
     print("Disk Util: \n" + str(disk.total_time/time))
     print("Average # of items in CPU queue: \n" + str(cpu_queue_cap / iteration))
