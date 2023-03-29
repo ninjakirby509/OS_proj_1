@@ -151,7 +151,7 @@ def main():
     disk.handle_util(time)
     print("FINAL STATS:")
     print("Average Turnaround: \n" + str(turnaround/10000))
-    print("Average Throughput: \n" + str(time/10000))
+    print("Average Throughput: \n" + str(1/(time/10000)))
     print("CPU Util: \n" + str(cpu.total_time/time))
     print("Disk Util: \n" + str(disk.total_time/time))
     print("Average # of items in CPU queue: \n" + str(cpu_queue_cap / iteration))
